@@ -15,25 +15,59 @@ let currentLightboxImages = [];
 // ADMIN AUTHENTICATION SYSTEM
 // ============================================
 function initAdminAuth() {
+    console.log('Checking admin auth...');
+
+    // Check if admin is already authenticated in this session
+    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        console.log('Admin already authenticated in this session');
+        isAdmin = true;
+        enableAdminMode();
+        return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const adminParam = urlParams.get('admin');
 
+    console.log('Admin param found:', adminParam !== null);
+
     if (adminParam !== null) {
         const password = prompt("Enter Admin Password:");
+        console.log('Password entered:', password ? 'Yes' : 'No');
+
         if (password === "1381075") {
+            console.log('Password correct! Enabling admin mode...');
             isAdmin = true;
+            sessionStorage.setItem('admin_authenticated', 'true');
             enableAdminMode();
+
+            // Clean URL without reload
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
         } else {
+            console.log('Password incorrect');
             alert("Wrong Password! Access Denied.");
+            sessionStorage.removeItem('admin_authenticated');
+
+            // Clean URL without reload
             const newUrl = window.location.pathname + window.location.hash;
             window.history.replaceState({}, document.title, newUrl);
         }
+    } else {
+        console.log('No admin param in URL');
     }
 }
 
 function enableAdminMode() {
+    console.log('Enabling admin mode...');
     document.body.classList.add('admin-mode');
-    document.getElementById('adminBar').style.display = 'flex';
+
+    const adminBar = document.getElementById('adminBar');
+    if (adminBar) {
+        adminBar.style.display = 'flex';
+        console.log('Admin bar shown');
+    } else {
+        console.error('Admin bar not found!');
+    }
 
     const adminButtons = ['addCertBtn', 'addGalleryBtn', 'addSectionBtn'];
     adminButtons.forEach(id => {
@@ -999,19 +1033,36 @@ document.addEventListener('keydown', (e) => {
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    // STEP 1: Load saved data FIRST (for everyone - admin + public)
-    loadPortfolioData();
+    console.log('DOM Loaded - Starting initialization...');
+    console.log('Current URL:', window.location.href);
+    console.log('Search params:', window.location.search);
 
-    // STEP 2: Then check admin
+    // STEP 1: Check admin FIRST (before anything else)
     initAdminAuth();
 
-    // STEP 3: Lock images for public
+    // STEP 2: Load saved data (for everyone)
+    try {
+        loadPortfolioData();
+    } catch (e) {
+        console.error('Error loading portfolio data:', e);
+    }
+
+    // STEP 3: Load saved images
+    try {
+        loadSavedImages();
+    } catch (e) {
+        console.error('Error loading saved images:', e);
+    }
+
+    // STEP 4: Lock images for public
     lockImages();
 
-    // STEP 4: Lock profile image for public
+    // STEP 5: Lock profile image for public (if not admin)
     const heroWrapper = document.querySelector('.hero-image-wrapper');
     if (heroWrapper && !isAdmin) {
         heroWrapper.style.pointerEvents = 'none';
         heroWrapper.style.cursor = 'default';
     }
+
+    console.log('Initialization complete. isAdmin:', isAdmin);
 });
