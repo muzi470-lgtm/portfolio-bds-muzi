@@ -65,36 +65,36 @@
                     <input type="file" id="profileUpload" accept="image/*" style="display: none;">
                 </div>
                 <div class="hero-text reveal-right">
-                    <h1>Dr. [Your<br>Name]</h1>
-                    <div class="subtitle">Bachelor of Dental Surgery</div>
-                    <p class="description">
+                    <h1 data-save-id="hero_name">Dr. [Your<br>Name]</h1>
+                    <div class="subtitle" data-save-id="hero_subtitle">Bachelor of Dental Surgery</div>
+                    <p class="description" data-save-id="hero_desc">
                         Passionate Dental Surgeon dedicated to delivering exceptional patient care 
                         through clinical excellence and compassionate treatment. Committed to continuous 
                         learning and advancing dental healthcare standards.
                     </p>
                     <div class="hero-stats">
                         <div class="stat-item">
-                            <span class="stat-number">[X]+</span>
+                            <span class="stat-number" data-save-id="stat_procedures">[X]+</span>
                             <span class="stat-label">Procedures</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">[X]+</span>
+                            <span class="stat-number" data-save-id="stat_patients">[X]+</span>
                             <span class="stat-label">Patients</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">[X]</span>
+                            <span class="stat-number" data-save-id="stat_years">[X]</span>
                             <span class="stat-label">Years Exp.</span>
                         </div>
                     </div>
                     <div class="hero-contact">
                         <a href="mailto:your.email@example.com" class="contact-btn">
-                            <i class="fas fa-envelope"></i> <span>Email Me</span>
+                            <i class="fas fa-envelope"></i> <span data-save-id="btn_email">Email Me</span>
                         </a>
                         <a href="tel:+91XXXXXXXXXX" class="contact-btn">
-                            <i class="fas fa-phone"></i> <span>Call Now</span>
+                            <i class="fas fa-phone"></i> <span data-save-id="btn_call">Call Now</span>
                         </a>
                         <a href="#" class="contact-btn">
-                            <i class="fab fa-linkedin"></i> <span>LinkedIn</span>
+                            <i class="fab fa-linkedin"></i> <span data-save-id="btn_linkedin">LinkedIn</span>
                         </a>
                     </div>
                 </div>
@@ -104,23 +104,23 @@
         <!-- About Section -->
         <section class="section-wrapper" id="about">
             <div class="section-header reveal">
-                <h2><i class="fas fa-user-md"></i> <span>About Me</span></h2>
-                <p>Professional summary and highlights</p>
+                <h2><i class="fas fa-user-md"></i> <span data-save-id="about_title">About Me</span></h2>
+                <p data-save-id="about_subtitle">Professional summary and highlights</p>
             </div>
             <div class="about-grid">
                 <div class="glass-card reveal-left">
                     <div class="about-text">
-                        <p>
+                        <p data-save-id="about_p1">
                             I am a dedicated Dental Surgeon with comprehensive training in clinical dentistry 
                             and a strong commitment to patient-centered care. My expertise spans across multiple 
                             dental specialties including oral surgery, endodontics, periodontics, and prosthodontics.
                         </p>
-                        <p>
+                        <p data-save-id="about_p2">
                             Throughout my academic journey and clinical practice, I have developed exceptional 
                             skills in diagnosis, treatment planning, and executing complex dental procedures. 
                             I believe in preventive dentistry and educating patients about oral health maintenance.
                         </p>
-                        <p>
+                        <p data-save-id="about_p3">
                             I am seeking opportunities to contribute my clinical expertise while continuing 
                             professional development in a dynamic healthcare environment that values excellence 
                             and patient welfare.
@@ -131,29 +131,29 @@
                     <div class="highlight-card reveal-right delay-1">
                         <div class="highlight-icon"><i class="fas fa-tooth"></i></div>
                         <div class="highlight-content">
-                            <h4>Clinical Excellence</h4>
-                            <p>Trained in advanced dental procedures</p>
+                            <h4 data-save-id="highlight1_title">Clinical Excellence</h4>
+                            <p data-save-id="highlight1_desc">Trained in advanced dental procedures</p>
                         </div>
                     </div>
                     <div class="highlight-card reveal-right delay-2">
                         <div class="highlight-icon"><i class="fas fa-heart"></i></div>
                         <div class="highlight-content">
-                            <h4>Patient Care</h4>
-                            <p>Compassionate and empathetic approach</p>
+                            <h4 data-save-id="highlight2_title">Patient Care</h4>
+                            <p data-save-id="highlight2_desc">Compassionate and empathetic approach</p>
                         </div>
                     </div>
                     <div class="highlight-card reveal-right delay-3">
                         <div class="highlight-icon"><i class="fas fa-shield-virus"></i></div>
                         <div class="highlight-content">
-                            <h4>Sterilization Expert</h4>
-                            <p>Strict infection control protocols</p>
+                            <h4 data-save-id="highlight3_title">Sterilization Expert</h4>
+                            <p data-save-id="highlight3_desc">Strict infection control protocols</p>
                         </div>
                     </div>
                     <div class="highlight-card reveal-right delay-4">
                         <div class="highlight-icon"><i class="fas fa-graduation-cap"></i></div>
                         <div class="highlight-content">
-                            <h4>Continuous Learning</h4>
-                            <p>Always updating with latest techniques</p>
+                            <h4 data-save-id="highlight4_title">Continuous Learning</h4>
+                            <p data-save-id="highlight4_desc">Always updating with latest techniques</p>
                         </div>
                     </div>
                 </div>
@@ -163,16 +163,16 @@
         <!-- Education Section -->
         <section class="section-wrapper" id="education">
             <div class="section-header reveal">
-                <h2><i class="fas fa-graduation-cap"></i> <span>Education</span></h2>
-                <p>Academic qualifications and training</p>
+                <h2><i class="fas fa-graduation-cap"></i> <span data-save-id="edu_title">Education</span></h2>
+                <p data-save-id="edu_subtitle">Academic qualifications and training</p>
             </div>
             <div class="timeline-container">
                 <div class="timeline-card reveal-left">
                     <div class="timeline-header">
-                        <span class="timeline-title">Bachelor of Dental Surgery (BDS)</span>
-                        <span class="timeline-date">20XX - 20XX</span>
+                        <span class="timeline-title" data-save-id="edu_degree1">Bachelor of Dental Surgery (BDS)</span>
+                        <span class="timeline-date" data-save-id="edu_date1">20XX - 20XX</span>
                     </div>
-                    <div class="timeline-subtitle">[Your Dental College Name], [University Name]</div>
+                    <div class="timeline-subtitle" data-save-id="edu_college1">[Your Dental College Name], [University Name]</div>
                     <div class="timeline-desc">
                         <ul>
                             <li>Comprehensive training in all major dental specialties</li>
@@ -184,10 +184,10 @@
                 </div>
                 <div class="timeline-card reveal-left delay-2">
                     <div class="timeline-header">
-                        <span class="timeline-title">Higher Secondary (12th Grade)</span>
+                        <span class="timeline-title" data-save-id="edu_degree2">Higher Secondary (12th Grade)</span>
                         <span class="timeline-date">20XX - 20XX</span>
                     </div>
-                    <div class="timeline-subtitle">[School Name], [Board]</div>
+                    <div class="timeline-subtitle" data-save-id="edu_school">[School Name], [Board]</div>
                     <div class="timeline-desc">
                         <ul>
                             <li>Major subjects: Physics, Chemistry, Biology</li>
@@ -201,14 +201,14 @@
         <!-- Experience Section -->
         <section class="section-wrapper" id="experience">
             <div class="section-header reveal">
-                <h2><i class="fas fa-hospital"></i> <span>Clinical Experience</span></h2>
-                <p>Internships and practical training</p>
+                <h2><i class="fas fa-hospital"></i> <span data-save-id="exp_title">Clinical Experience</span></h2>
+                <p data-save-id="exp_subtitle">Internships and practical training</p>
             </div>
             <div class="experience-grid">
                 <div class="exp-card reveal">
                     <div class="exp-icon"><i class="fas fa-user-md"></i></div>
                     <div class="exp-content">
-                        <h3>Rotatory Internship</h3>
+                        <h3 data-save-id="exp_job1">Rotatory Internship</h3>
                         <div class="exp-meta">
                             <span><i class="fas fa-building"></i> <span>[Hospital/College Name]</span></span>
                             <span><i class="fas fa-calendar"></i> <span>[Month Year] - [Month Year]</span></span>
@@ -226,7 +226,7 @@
                 <div class="exp-card reveal delay-2">
                     <div class="exp-icon"><i class="fas fa-stethoscope"></i></div>
                     <div class="exp-content">
-                        <h3>Clinical Observer / Assistant</h3>
+                        <h3 data-save-id="exp_job2">Clinical Observer / Assistant</h3>
                         <div class="exp-meta">
                             <span><i class="fas fa-building"></i> <span>[Clinic/Hospital Name]</span></span>
                             <span><i class="fas fa-calendar"></i> <span>[Month Year] - [Month Year]</span></span>
@@ -246,8 +246,8 @@
         <!-- Skills Section -->
         <section class="section-wrapper" id="skills">
             <div class="section-header reveal">
-                <h2><i class="fas fa-stethoscope"></i> <span>Skills &amp; Expertise</span></h2>
-                <p>Clinical competencies and technical abilities</p>
+                <h2><i class="fas fa-stethoscope"></i> <span data-save-id="skills_title">Skills &amp; Expertise</span></h2>
+                <p data-save-id="skills_subtitle">Clinical competencies and technical abilities</p>
             </div>
             <div class="skills-grid">
                 <div class="skill-card reveal-scale delay-1">
@@ -299,8 +299,8 @@
         <!-- Certifications Section -->
         <section class="section-wrapper" id="certifications">
             <div class="section-header reveal">
-                <h2><i class="fas fa-certificate"></i> <span>Certifications</span></h2>
-                <p>Professional certifications and workshops</p>
+                <h2><i class="fas fa-certificate"></i> <span data-save-id="cert_title">Certifications</span></h2>
+                <p data-save-id="cert_subtitle">Professional certifications and workshops</p>
             </div>
             <div class="cert-grid" id="certGrid">
                 <div class="cert-card reveal" data-cert-id="1">
@@ -358,8 +358,8 @@
         <!-- Gallery Section -->
         <section class="section-wrapper" id="gallery">
             <div class="section-header reveal">
-                <h2><i class="fas fa-camera"></i> <span>Clinical Gallery</span></h2>
-                <p>Case studies and clinical work</p>
+                <h2><i class="fas fa-camera"></i> <span data-save-id="gallery_title">Clinical Gallery</span></h2>
+                <p data-save-id="gallery_subtitle">Case studies and clinical work</p>
             </div>
             <div class="gallery-grid" id="galleryGrid">
                 <!-- Gallery items with multi-image support -->
@@ -426,8 +426,8 @@
 
         <!-- Footer / Contact -->
         <footer class="footer" id="contact">
-            <h3>Let's Connect</h3>
-            <p>Available for job opportunities and clinical collaborations</p>
+            <h3 data-save-id="footer_title">Let's Connect</h3>
+            <p data-save-id="footer_desc">Available for job opportunities and clinical collaborations</p>
             <div class="footer-social">
                 <a href="#"><i class="fab fa-linkedin-in"></i></a>
                 <a href="#"><i class="fab fa-whatsapp"></i></a>
@@ -435,12 +435,12 @@
                 <a href="#"><i class="fas fa-phone"></i></a>
             </div>
             <div class="footer-contact">
-                <span><i class="fas fa-envelope"></i> <span>your.email@example.com</span></span>
-                <span><i class="fas fa-phone"></i> <span>+91 XXXXX XXXXX</span></span>
-                <span><i class="fas fa-map-marker-alt"></i> <span>[Your City, State]</span></span>
+                <span><i class="fas fa-envelope"></i> <span data-save-id="footer_email">your.email@example.com</span></span>
+                <span><i class="fas fa-phone"></i> <span data-save-id="footer_phone">+91 XXXXX XXXXX</span></span>
+                <span><i class="fas fa-map-marker-alt"></i> <span data-save-id="footer_location">[Your City, State]</span></span>
             </div>
             <div class="footer-bottom">
-                <p>References available upon request | Dr. [Your Name] &copy; 2026</p>
+                <p data-save-id="footer_copyright">References available upon request | Dr. [Your Name] &copy; 2026</p>
             </div>
         </footer>
     </div>

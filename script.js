@@ -1,5 +1,5 @@
 /* ============================================
-   BDS PORTFOLIO - MAIN JAVASCRIPT (FIXED)
+   BDS PORTFOLIO - MAIN JAVASCRIPT (WITH SAVE FIX)
    ============================================ */
 
 // ============================================
@@ -12,7 +12,7 @@ let currentLightboxIndex = 0;
 let currentLightboxImages = [];
 
 // ============================================
-// ADMIN AUTHENTICATION SYSTEM (FIXED)
+// ADMIN AUTHENTICATION SYSTEM
 // ============================================
 function initAdminAuth() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,7 +25,6 @@ function initAdminAuth() {
             enableAdminMode();
         } else {
             alert("Wrong Password! Access Denied.");
-            // Remove ?admin from URL without reload
             const newUrl = window.location.pathname + window.location.hash;
             window.history.replaceState({}, document.title, newUrl);
         }
@@ -36,16 +35,12 @@ function enableAdminMode() {
     document.body.classList.add('admin-mode');
     document.getElementById('adminBar').style.display = 'flex';
 
-    // Show all admin-only buttons
-    const adminButtons = [
-        'addCertBtn', 'addGalleryBtn', 'addSectionBtn'
-    ];
+    const adminButtons = ['addCertBtn', 'addGalleryBtn', 'addSectionBtn'];
     adminButtons.forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.style.display = 'inline-flex';
     });
 
-    // Enable profile image upload
     const heroWrapper = document.querySelector('.hero-image-wrapper');
     if (heroWrapper) {
         heroWrapper.style.cursor = 'pointer';
@@ -61,7 +56,129 @@ function enableAdminMode() {
 }
 
 // ============================================
-// TOGGLE EDIT MODE (FIXED - NOW INJECTS contenteditable)
+// LOCALSTORAGE SAVE/LOAD SYSTEM
+// ============================================
+const STORAGE_KEY = 'bds_portfolio_data';
+
+function savePortfolioData() {
+    const data = {};
+
+    // Save all editable text content with data IDs
+    document.querySelectorAll('[data-save-id]').forEach(el => {
+        const id = el.getAttribute('data-save-id');
+        if (id) {
+            data[id] = el.innerHTML;
+        }
+    });
+
+    // Save profile image
+    const profileImg = document.getElementById('profileImage');
+    if (profileImg && profileImg.src && !profileImg.src.includes('placeholder')) {
+        data['profile_image'] = profileImg.src;
+    }
+
+    // Save dynamic sections HTML
+    const dynamicSections = document.getElementById('dynamicSections');
+    if (dynamicSections) {
+        data['dynamic_sections'] = dynamicSections.innerHTML;
+    }
+
+    // Save certificates count and gallery count
+    data['cert_count'] = document.querySelectorAll('.cert-card').length;
+    data['gallery_count'] = document.querySelectorAll('.gallery-item').length;
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    console.log('Portfolio saved to localStorage!');
+
+    // Show save notification
+    showSaveNotification('Changes Saved!');
+}
+
+function loadPortfolioData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+        const data = JSON.parse(saved);
+
+        // Restore text content
+        Object.keys(data).forEach(key => {
+            if (key.startsWith('text_') || key.startsWith('title_') || key.startsWith('desc_')) {
+                const el = document.querySelector(`[data-save-id="${key}"]`);
+                if (el) {
+                    el.innerHTML = data[key];
+                }
+            }
+        });
+
+        // Restore profile image
+        if (data['profile_image']) {
+            const profileImg = document.getElementById('profileImage');
+            if (profileImg) {
+                profileImg.src = data['profile_image'];
+            }
+        }
+
+        // Restore dynamic sections
+        if (data['dynamic_sections']) {
+            const dynamicSections = document.getElementById('dynamicSections');
+            if (dynamicSections) {
+                dynamicSections.innerHTML = data['dynamic_sections'];
+            }
+        }
+
+        console.log('Portfolio loaded from localStorage!');
+    } catch (e) {
+        console.error('Error loading portfolio data:', e);
+    }
+}
+
+function showSaveNotification(message) {
+    // Remove existing notification
+    const existing = document.getElementById('saveNotification');
+    if (existing) existing.remove();
+
+    const notif = document.createElement('div');
+    notif.id = 'saveNotification';
+    notif.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        color: var(--primary);
+        padding: 14px 28px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        z-index: 10000;
+        box-shadow: 0 8px 30px var(--accent-glow);
+        animation: slideIn 0.3s ease;
+    `;
+    notif.textContent = message;
+    document.body.appendChild(notif);
+
+    setTimeout(() => {
+        notif.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notif.remove(), 300);
+    }, 2000);
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100px); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// ============================================
+// TOGGLE EDIT MODE (WITH SAVE)
 // ============================================
 function toggleEditMode() {
     if (!isAdmin) return;
@@ -90,12 +207,18 @@ function toggleEditMode() {
             '.section-header h2 span', '.section-header p'
         ];
 
+        let idCounter = 0;
         editableSelectors.forEach(selector => {
             document.querySelectorAll(selector).forEach(el => {
-                // Skip elements that are inside buttons or have special roles
                 if (el.closest('button') || el.closest('a') || el.closest('.lightbox') || el.closest('.crop-modal')) {
                     return;
                 }
+
+                // Assign unique save ID if not already has one
+                if (!el.getAttribute('data-save-id')) {
+                    el.setAttribute('data-save-id', 'text_' + idCounter++);
+                }
+
                 el.setAttribute('contenteditable', 'true');
                 el.classList.add('editable-active');
             });
@@ -103,6 +226,9 @@ function toggleEditMode() {
 
         // 2. Also handle specific text containers
         document.querySelectorAll('.about-text p, .timeline-desc li, .exp-desc li').forEach(el => {
+            if (!el.getAttribute('data-save-id')) {
+                el.setAttribute('data-save-id', 'text_' + idCounter++);
+            }
             el.setAttribute('contenteditable', 'true');
             el.classList.add('editable-active');
         });
@@ -114,7 +240,7 @@ function toggleEditMode() {
         }
 
         // 4. Update button
-        btn.innerHTML = '<i class="fas fa-lock"></i> <span>Lock for Viewers</span>';
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>Lock & Save</span>';
         btn.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
 
         // 5. Show remove buttons on dynamic sections
@@ -128,33 +254,36 @@ function toggleEditMode() {
         console.log("Edit mode UNLOCKED - All text is now editable!");
 
     } else {
-        // ========== VIEW MODE ON (LOCK EVERYTHING) ==========
+        // ========== VIEW MODE ON (LOCK & SAVE) ==========
 
-        // 1. Remove contenteditable from ALL elements
+        // 1. SAVE ALL CHANGES FIRST
+        savePortfolioData();
+
+        // 2. Remove contenteditable from ALL elements
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
             el.setAttribute('contenteditable', 'false');
             el.classList.remove('editable-active');
         });
 
-        // 2. Lock profile image
+        // 3. Lock profile image
         if (heroWrapper) {
             heroWrapper.style.pointerEvents = 'none';
             heroWrapper.style.cursor = 'default';
         }
 
-        // 3. Update button
+        // 4. Update button
         btn.innerHTML = '<i class="fas fa-unlock"></i> <span>Unlock to Edit</span>';
         btn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent-light))';
 
-        // 4. Hide remove buttons
+        // 5. Hide remove buttons
         document.querySelectorAll('.remove-section-btn').forEach(btn => {
             btn.style.display = 'none';
         });
 
-        // 5. Lock images again
+        // 6. Lock images again
         lockImages();
 
-        console.log("Edit mode LOCKED - All text is now read-only!");
+        console.log("Edit mode LOCKED - All changes saved!");
     }
 }
 
@@ -182,7 +311,6 @@ function toggleMobileNav() {
     }
 }
 
-// Close mobile nav when clicking a link
 document.querySelectorAll('.nav a').forEach(link => {
     link.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
@@ -357,7 +485,6 @@ function navigateLightbox(direction, e) {
     cap.textContent = item.caption || '';
 }
 
-// Keyboard navigation for lightbox
 document.addEventListener('keydown', (e) => {
     const modal = document.getElementById('lightboxModal');
     if (!modal.classList.contains('active')) return;
@@ -516,16 +643,15 @@ function addCertificate() {
         </div>
         <div class="cert-content">
             <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
-            <h4>[Certificate Title]</h4>
-            <p>[Organization]</p>
-            <p class="cert-date"><i class="fas fa-calendar"></i> <span>[Year]</span></p>
+            <h4 data-save-id="cert_title_${certCount}">[Certificate Title]</h4>
+            <p data-save-id="cert_org_${certCount}">[Organization]</p>
+            <p class="cert-date"><i class="fas fa-calendar"></i> <span data-save-id="cert_date_${certCount}">[Year]</span></p>
         </div>
     `;
     grid.appendChild(card);
     revealObserver.observe(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Make new text editable immediately
     if (isEditMode) {
         card.querySelectorAll('h4, p, span').forEach(el => {
             el.setAttribute('contenteditable', 'true');
@@ -552,12 +678,11 @@ function addGalleryItem() {
             <div class="case-image-count"><i class="fas fa-images"></i> 1</div>
         </div>
         <div class="gallery-overlay">
-            <h4>[Case Title]</h4>
-            <p>[Brief description]</p>
+            <h4 data-save-id="gallery_title_${galleryCount}">[Case Title]</h4>
+            <p data-save-id="gallery_desc_${galleryCount}">[Brief description]</p>
         </div>
     `;
 
-    // Add to caseData
     caseData[galleryCount] = {
         title: '[New Case Title]',
         description: '[Case description goes here]',
@@ -570,7 +695,6 @@ function addGalleryItem() {
     revealObserver.observe(item);
     item.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Make new text editable immediately
     if (isEditMode) {
         item.querySelectorAll('h4, p').forEach(el => {
             el.setAttribute('contenteditable', 'true');
@@ -595,13 +719,13 @@ function addNewSection() {
             <i class="fas fa-trash"></i> Remove Section
         </button>
         <div class="section-header reveal">
-            <h2><i class="fas fa-folder-open"></i> <span>New Section Title</span></h2>
-            <p>Section description goes here</p>
+            <h2><i class="fas fa-folder-open"></i> <span data-save-id="section_title_${sectionCount}">New Section Title</span></h2>
+            <p data-save-id="section_desc_${sectionCount}">Section description goes here</p>
         </div>
         <div class="glass-card reveal">
             <div class="about-text">
-                <p>Click here to add your content.</p>
-                <p>This is a fully customizable section. Add as much content as you need.</p>
+                <p data-save-id="section_text1_${sectionCount}">Click here to add your content.</p>
+                <p data-save-id="section_text2_${sectionCount}">This is a fully customizable section. Add as much content as you need.</p>
             </div>
         </div>
     `;
@@ -610,9 +734,8 @@ function addNewSection() {
     revealObserver.observe(section.querySelector('.glass-card'));
     section.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Make new text editable immediately
     if (isEditMode) {
-        section.querySelectorAll('h2, p').forEach(el => {
+        section.querySelectorAll('h2, p, span').forEach(el => {
             el.setAttribute('contenteditable', 'true');
             el.classList.add('editable-active');
         });
@@ -671,7 +794,6 @@ function unlockImages() {
     });
 }
 
-// Prevent right-click on images in public mode
 document.addEventListener('contextmenu', (e) => {
     if (!isAdmin && e.target.tagName === 'IMG') {
         e.preventDefault();
@@ -682,7 +804,6 @@ document.addEventListener('contextmenu', (e) => {
 // KEYBOARD SHORTCUTS
 // ============================================
 document.addEventListener('keydown', (e) => {
-    // Close modals with Escape
     if (e.key === 'Escape') {
         closeLightbox();
         closeCaseModal();
@@ -696,9 +817,9 @@ document.addEventListener('keydown', (e) => {
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
     initAdminAuth();
+    loadPortfolioData(); // Load saved data on page load
     lockImages();
 
-    // Ensure profile image is locked in public mode
     const heroWrapper = document.querySelector('.hero-image-wrapper');
     if (heroWrapper && !isAdmin) {
         heroWrapper.style.pointerEvents = 'none';
