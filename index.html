@@ -415,6 +415,18 @@
                 display: none !important;
             }
         }
+        /* Image ko select aur edit hone se rokne ke liye */
+img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none; /* Yeh clicks ko roke ga */
+}
+
+/* Lekin jab admin login ho (Edit Mode), tab click enable karo */
+body:not(.viewer-mode) img {
+    pointer-events: auto;
+}
     </style>
 <!--<base target="_blank">--><base href="." target="_blank">
 </head>
