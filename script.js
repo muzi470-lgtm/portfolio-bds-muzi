@@ -261,12 +261,19 @@ function handleGalleryUpload(event, caseId) {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log('Gallery upload triggered for case:', caseId);
+
     const reader = new FileReader();
     reader.onload = function(e) {
+        console.log('Gallery image loaded, updating...');
+
         // Update the gallery card image
         const img = document.getElementById('gallery-img-' + caseId);
         if (img) {
             img.src = e.target.result;
+            console.log('Gallery img-' + caseId + ' updated');
+        } else {
+            console.error('Gallery img-' + caseId + ' not found!');
         }
 
         // Update caseData for modal
@@ -285,12 +292,32 @@ function handleGalleryUpload(event, caseId) {
     event.target.value = '';
 }
 
+// Unified gallery click handler - decides between upload or modal
+function handleGalleryClick(caseId) {
+    console.log('Gallery clicked, caseId:', caseId, 'isEditMode:', isEditMode);
+
+    if (isEditMode) {
+        // In edit mode: trigger file upload
+        console.log('Edit mode active - triggering upload for case', caseId);
+        const uploadInput = document.getElementById('gallery-upload-' + caseId);
+        if (uploadInput) {
+            uploadInput.click();
+        } else {
+            console.error('Upload input not found for gallery case', caseId);
+        }
+    } else {
+        // In view mode: open case modal
+        console.log('View mode - opening case modal for', caseId);
+        openCaseModal(caseId);
+    }
+}
+
 // Save image to localStorage (with size check)
 function saveImageToStorage(key, dataUrl) {
     try {
         localStorage.setItem(key, dataUrl);
+        console.log('Image saved to localStorage:', key);
     } catch (e) {
-        // If quota exceeded, try to compress or show error
         if (e.name === 'QuotaExceededError') {
             console.warn('Image too large for localStorage. Consider using a smaller image.');
             showSaveNotification('Image too large! Use smaller image.');
@@ -302,13 +329,16 @@ function saveImageToStorage(key, dataUrl) {
 
 // Load saved images from localStorage
 function loadSavedImages() {
+    console.log('Loading saved images...');
+
     // Load certificate images
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 20; i++) {
         const saved = localStorage.getItem('cert_image_' + i);
         if (saved) {
             const img = document.getElementById('cert-img-' + i);
             if (img) {
                 img.src = saved;
+                console.log('Loaded cert image', i);
             }
             if (certData[i]) {
                 certData[i].image = saved;
@@ -317,12 +347,13 @@ function loadSavedImages() {
     }
 
     // Load gallery images
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 20; i++) {
         const saved = localStorage.getItem('gallery_image_' + i);
         if (saved) {
             const img = document.getElementById('gallery-img-' + i);
             if (img) {
                 img.src = saved;
+                console.log('Loaded gallery image', i);
             }
             if (caseData[i] && caseData[i].images.length > 0) {
                 caseData[i].images[0].src = saved;
@@ -333,18 +364,26 @@ function loadSavedImages() {
 
 // Setup click-to-upload for cert images (admin only)
 function setupCertUploadClicks() {
+    console.log('Setting up cert upload clicks...');
     document.querySelectorAll('.cert-image').forEach(el => {
-        el.addEventListener('click', function(e) {
-            if (!isEditMode) return; // Only in edit mode
+        // Remove old listeners first to avoid duplicates
+        const newEl = el.cloneNode(true);
+        el.parentNode.replaceChild(newEl, el);
 
-            // Don't trigger if clicking on already uploaded image (modal should open)
+        newEl.addEventListener('click', function(e) {
+            if (!isEditMode) return;
+
             const certCard = this.closest('.cert-card');
             const certId = certCard ? certCard.getAttribute('data-cert-id') : null;
 
             if (certId) {
                 e.stopPropagation();
                 e.preventDefault();
-                document.getElementById('cert-upload-' + certId).click();
+                console.log('Cert clicked for upload:', certId);
+                const uploadInput = document.getElementById('cert-upload-' + certId);
+                if (uploadInput) {
+                    uploadInput.click();
+                }
             }
         });
     });
@@ -352,9 +391,14 @@ function setupCertUploadClicks() {
 
 // Setup click-to-upload for gallery images (admin only)
 function setupGalleryUploadClicks() {
+    console.log('Setting up gallery upload clicks...');
     document.querySelectorAll('.gallery-case-preview').forEach(el => {
-        el.addEventListener('click', function(e) {
-            if (!isEditMode) return; // Only in edit mode
+        // Remove old listeners first to avoid duplicates
+        const newEl = el.cloneNode(true);
+        el.parentNode.replaceChild(newEl, el);
+
+        newEl.addEventListener('click', function(e) {
+            if (!isEditMode) return;
 
             const galleryItem = this.closest('.gallery-item');
             const caseId = galleryItem ? galleryItem.getAttribute('data-case-id') : null;
@@ -362,21 +406,13 @@ function setupGalleryUploadClicks() {
             if (caseId) {
                 e.stopPropagation();
                 e.preventDefault();
-
-                // Check if upload input exists, if not create one
-                let uploadInput = document.getElementById('gallery-upload-' + caseId);
-                if (!uploadInput) {
-                    uploadInput = document.createElement('input');
-                    uploadInput.type = 'file';
-                    uploadInput.id = 'gallery-upload-' + caseId;
-                    uploadInput.accept = 'image/*';
-                    uploadInput.style.display = 'none';
-                    uploadInput.onchange = function(event) {
-                        handleGalleryUpload(event, caseId);
-                    };
-                    document.body.appendChild(uploadInput);
+                console.log('Gallery clicked for upload:', caseId);
+                const uploadInput = document.getElementById('gallery-upload-' + caseId);
+                if (uploadInput) {
+                    uploadInput.click();
+                } else {
+                    console.error('Gallery upload input not found for case', caseId);
                 }
-                uploadInput.click();
             }
         });
     });
@@ -890,10 +926,11 @@ function addGalleryItem() {
     item.setAttribute('data-case-id', galleryCount);
     item.setAttribute('onclick', `openCaseModal(${galleryCount})`);
     item.innerHTML = `
-        <div class="gallery-case-preview">
+        <div class="gallery-case-preview" onclick="handleGalleryClick(${galleryCount})">
             <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=New+Case+${galleryCount}" alt="Case ${galleryCount}" id="gallery-img-${galleryCount}">
             <div class="case-image-count"><i class="fas fa-images"></i> 1</div>
         </div>
+        <input type="file" id="gallery-upload-${galleryCount}" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, ${galleryCount})">
         <div class="gallery-overlay">
             <h4 data-save-id="gallery_title_${galleryCount}">[Case Title]</h4>
             <p data-save-id="gallery_desc_${galleryCount}">[Brief description]</p>
