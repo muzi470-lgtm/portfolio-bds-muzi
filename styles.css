@@ -57,22 +57,23 @@ body:not(.admin-mode) *:active {
 body.admin-mode * {
     cursor: auto;
 }
-body.admin-mode [contenteditable="true"] {
-    cursor: text;
-    border: 1px dashed var(--accent);
+body.admin-mode .editable-active {
+    border: 1px dashed var(--accent) !important;
     border-radius: 4px;
     padding: 2px 4px;
-    background: rgba(6,182,212,0.05);
+    background: rgba(6, 182, 212, 0.05);
     transition: all 0.2s;
+    cursor: text !important;
 }
-body.admin-mode [contenteditable="true"]:hover {
-    border-color: var(--accent-light);
-    background: rgba(6,182,212,0.1);
+body.admin-mode .editable-active:hover {
+    border-color: var(--accent-light) !important;
+    background: rgba(6, 182, 212, 0.1);
 }
-body.admin-mode [contenteditable="true"]:focus {
-    border-color: var(--accent-light);
-    background: rgba(6,182,212,0.15);
+body.admin-mode .editable-active:focus {
+    border-color: var(--accent-light) !important;
+    background: rgba(6, 182, 212, 0.15);
     outline: none;
+    box-shadow: 0 0 10px var(--accent-glow);
 }
 
 /* --- TOP BAR --- */
@@ -136,6 +137,7 @@ body.admin-mode [contenteditable="true"]:focus {
     border-radius: 50%;
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     color: var(--text);
     font-size: 1.2rem;
@@ -162,6 +164,7 @@ body.admin-mode [contenteditable="true"]:focus {
     inset: 0;
     background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     z-index: 98;
 }
 .mobile-nav-overlay.active {
@@ -425,25 +428,46 @@ body.admin-mode [contenteditable="true"]:focus {
     /* HIDE DESKTOP NAV, SHOW HAMBURGER */
     .nav { 
         position: fixed;
-        top: 0; right: -100%;
+        top: 0;
+        right: -100%;
         width: 280px;
         height: 100vh;
+        left: auto;
+        transform: none;
         flex-direction: column;
         gap: 0;
         border-radius: 0;
         padding: 80px 20px 20px;
         background: rgba(15, 23, 42, 0.98);
         backdrop-filter: blur(30px);
-        transform: translateX(0);
+        -webkit-backdrop-filter: blur(30px);
         transition: right 0.4s ease;
         z-index: 99;
+        box-shadow: -10px 0 40px rgba(0,0,0,0.5);
     }
-    .nav.active { right: 0; }
-    .nav a { padding: 15px 20px; border-bottom: 1px solid var(--glass-border); font-size: 1rem; }
-    .nav a::after { display: none; }
-    .nav a:hover, .nav a.active { background: var(--glass-bg); border-radius: 12px; }
+    .nav.active { 
+        right: 0; 
+    }
+    .nav a { 
+        padding: 15px 20px; 
+        border-bottom: 1px solid var(--glass-border); 
+        font-size: 1rem; 
+        display: block;
+        width: 100%;
+    }
+    .nav a::after { 
+        display: none; 
+    }
+    .nav a:hover, 
+    .nav a.active { 
+        background: var(--glass-bg); 
+        border-radius: 12px; 
+        color: var(--accent-light);
+    }
 
-    .mobile-nav-toggle { display: flex; }
+    .mobile-nav-toggle { 
+        display: flex; 
+    }
 
     .top-bar { padding: 8px 15px; }
     .main-container { padding: 100px 15px 50px; }
@@ -471,6 +495,9 @@ body.admin-mode [contenteditable="true"]:focus {
 }
 
 @media (max-width: 480px) {
+    .nav {
+        width: 260px;
+    }
     .hero-image { width: 200px; height: 200px; }
     .hero-image-ring { width: 230px; height: 230px; }
     .hero-image-ring-2 { width: 260px; height: 260px; }
@@ -509,24 +536,4 @@ body.admin-mode [contenteditable="true"]:focus {
         display: none !important;
     }
     .lightbox-modal, .case-modal, .cert-modal, .crop-modal { display: none !important; }
-}
-
-/* --- ADMIN EDIT MODE STYLES --- */
-body.admin-mode .editable-active {
-    border: 1px dashed var(--accent) !important;
-    border-radius: 4px;
-    padding: 2px 4px;
-    background: rgba(6, 182, 212, 0.05);
-    transition: all 0.2s;
-    cursor: text !important;
-}
-body.admin-mode .editable-active:hover {
-    border-color: var(--accent-light) !important;
-    background: rgba(6, 182, 212, 0.1);
-}
-body.admin-mode .editable-active:focus {
-    border-color: var(--accent-light) !important;
-    background: rgba(6, 182, 212, 0.15);
-    outline: none;
-    box-shadow: 0 0 10px var(--accent-glow);
 }
