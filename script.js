@@ -1,5 +1,5 @@
 /* ============================================
-   BDS PORTFOLIO - MAIN JAVASCRIPT
+   BDS PORTFOLIO - MAIN JAVASCRIPT (FIXED)
    ============================================ */
 
 // ============================================
@@ -12,7 +12,7 @@ let currentLightboxIndex = 0;
 let currentLightboxImages = [];
 
 // ============================================
-// ADMIN AUTHENTICATION SYSTEM
+// ADMIN AUTHENTICATION SYSTEM (FIXED)
 // ============================================
 function initAdminAuth() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -57,10 +57,12 @@ function enableAdminMode() {
         });
     }
 
-    // Add admin class to body for CSS targeting
     console.log("Admin mode enabled. Click 'Unlock to Edit' to make content editable.");
 }
 
+// ============================================
+// TOGGLE EDIT MODE (FIXED - NOW INJECTS contenteditable)
+// ============================================
 function toggleEditMode() {
     if (!isAdmin) return;
 
@@ -69,41 +71,90 @@ function toggleEditMode() {
     const heroWrapper = document.querySelector('.hero-image-wrapper');
 
     if (isEditMode) {
-        // EDIT MODE ON
-        document.querySelectorAll('h1, h2, h3, h4, p, span, li, .timeline-title, .timeline-subtitle, .timeline-date, .stat-number, .stat-label').forEach(el => {
-            el.setAttribute('contenteditable', 'true');
+        // ========== EDIT MODE ON ==========
+
+        // 1. Inject contenteditable="true" into ALL text elements
+        const editableSelectors = [
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'p', 'span', 'li', 'div.about-text',
+            '.timeline-title', '.timeline-subtitle', '.timeline-date',
+            '.stat-number', '.stat-label',
+            '.highlight-content h4', '.highlight-content p',
+            '.exp-content h3', '.exp-meta span span',
+            '.skill-card h3', '.skill-tag',
+            '.cert-content h4', '.cert-content p', '.cert-content .cert-date span',
+            '.gallery-overlay h4', '.gallery-overlay p',
+            '.footer h3', '.footer p', '.footer-contact span span',
+            '.footer-bottom p',
+            '.case-modal-desc',
+            '.section-header h2 span', '.section-header p'
+        ];
+
+        editableSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                // Skip elements that are inside buttons or have special roles
+                if (el.closest('button') || el.closest('a') || el.closest('.lightbox') || el.closest('.crop-modal')) {
+                    return;
+                }
+                el.setAttribute('contenteditable', 'true');
+                el.classList.add('editable-active');
+            });
         });
 
+        // 2. Also handle specific text containers
+        document.querySelectorAll('.about-text p, .timeline-desc li, .exp-desc li').forEach(el => {
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('editable-active');
+        });
+
+        // 3. Enable profile image upload
         if (heroWrapper) {
             heroWrapper.style.pointerEvents = 'auto';
             heroWrapper.style.cursor = 'pointer';
         }
 
+        // 4. Update button
         btn.innerHTML = '<i class="fas fa-lock"></i> <span>Lock for Viewers</span>';
         btn.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
 
-        // Show remove buttons on dynamic sections
+        // 5. Show remove buttons on dynamic sections
         document.querySelectorAll('.remove-section-btn').forEach(btn => {
             btn.style.display = 'flex';
         });
+
+        // 6. Unlock images for admin editing
+        unlockImages();
+
+        console.log("Edit mode UNLOCKED - All text is now editable!");
+
     } else {
-        // VIEW MODE ON (LOCK EVERYTHING)
+        // ========== VIEW MODE ON (LOCK EVERYTHING) ==========
+
+        // 1. Remove contenteditable from ALL elements
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
             el.setAttribute('contenteditable', 'false');
+            el.classList.remove('editable-active');
         });
 
+        // 2. Lock profile image
         if (heroWrapper) {
             heroWrapper.style.pointerEvents = 'none';
             heroWrapper.style.cursor = 'default';
         }
 
+        // 3. Update button
         btn.innerHTML = '<i class="fas fa-unlock"></i> <span>Unlock to Edit</span>';
         btn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent-light))';
 
-        // Hide remove buttons
+        // 4. Hide remove buttons
         document.querySelectorAll('.remove-section-btn').forEach(btn => {
             btn.style.display = 'none';
         });
+
+        // 5. Lock images again
+        lockImages();
+
+        console.log("Edit mode LOCKED - All text is now read-only!");
     }
 }
 
@@ -473,6 +524,14 @@ function addCertificate() {
     grid.appendChild(card);
     revealObserver.observe(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Make new text editable immediately
+    if (isEditMode) {
+        card.querySelectorAll('h4, p, span').forEach(el => {
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('editable-active');
+        });
+    }
 }
 
 // ============================================
@@ -510,6 +569,14 @@ function addGalleryItem() {
     grid.appendChild(item);
     revealObserver.observe(item);
     item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Make new text editable immediately
+    if (isEditMode) {
+        item.querySelectorAll('h4, p').forEach(el => {
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('editable-active');
+        });
+    }
 }
 
 // ============================================
@@ -542,6 +609,14 @@ function addNewSection() {
     revealObserver.observe(section.querySelector('.section-header'));
     revealObserver.observe(section.querySelector('.glass-card'));
     section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Make new text editable immediately
+    if (isEditMode) {
+        section.querySelectorAll('h2, p').forEach(el => {
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('editable-active');
+        });
+    }
 }
 
 function removeSection(id) {
@@ -573,7 +648,6 @@ function saveToPDF() {
 // IMAGE LOCKING (Robust Cross-Browser)
 // ============================================
 function lockImages() {
-    // Prevent drag, selection, and right-click on all images in public view
     document.querySelectorAll('img').forEach(img => {
         img.setAttribute('draggable', 'false');
         img.style.webkitUserDrag = 'none';
@@ -581,6 +655,7 @@ function lockImages() {
         img.style.webkitUserSelect = 'none';
         img.style.mozUserSelect = 'none';
         img.style.msUserSelect = 'none';
+        img.style.pointerEvents = 'none';
     });
 }
 
@@ -592,6 +667,7 @@ function unlockImages() {
         img.style.webkitUserSelect = 'auto';
         img.style.mozUserSelect = 'auto';
         img.style.msUserSelect = 'auto';
+        img.style.pointerEvents = 'auto';
     });
 }
 
