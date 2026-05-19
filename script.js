@@ -62,12 +62,14 @@ const STORAGE_KEY = 'bds_portfolio_data';
 
 function savePortfolioData() {
     const data = {};
+    let savedCount = 0;
 
-    // Save all editable text content with data IDs
+    // Save ALL elements with data-save-id
     document.querySelectorAll('[data-save-id]').forEach(el => {
         const id = el.getAttribute('data-save-id');
         if (id) {
             data[id] = el.innerHTML;
+            savedCount++;
         }
     });
 
@@ -75,20 +77,18 @@ function savePortfolioData() {
     const profileImg = document.getElementById('profileImage');
     if (profileImg && profileImg.src && !profileImg.src.includes('placeholder')) {
         data['profile_image'] = profileImg.src;
+        savedCount++;
     }
 
     // Save dynamic sections HTML
     const dynamicSections = document.getElementById('dynamicSections');
     if (dynamicSections) {
         data['dynamic_sections'] = dynamicSections.innerHTML;
+        savedCount++;
     }
 
-    // Save certificates count and gallery count
-    data['cert_count'] = document.querySelectorAll('.cert-card').length;
-    data['gallery_count'] = document.querySelectorAll('.gallery-item').length;
-
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    console.log('Portfolio saved to localStorage!');
+    console.log(`Portfolio saved to localStorage! (${savedCount} items saved)`);
 
     // Show save notification
     showSaveNotification('Changes Saved!');
@@ -96,18 +96,21 @@ function savePortfolioData() {
 
 function loadPortfolioData() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
+    if (!saved) {
+        console.log('No saved data found in localStorage');
+        return;
+    }
 
     try {
         const data = JSON.parse(saved);
+        let loadedCount = 0;
 
-        // Restore text content
-        Object.keys(data).forEach(key => {
-            if (key.startsWith('text_') || key.startsWith('title_') || key.startsWith('desc_')) {
-                const el = document.querySelector(`[data-save-id="${key}"]`);
-                if (el) {
-                    el.innerHTML = data[key];
-                }
+        // Restore text content by data-save-id
+        document.querySelectorAll('[data-save-id]').forEach(el => {
+            const id = el.getAttribute('data-save-id');
+            if (id && data[id] !== undefined) {
+                el.innerHTML = data[id];
+                loadedCount++;
             }
         });
 
@@ -116,6 +119,7 @@ function loadPortfolioData() {
             const profileImg = document.getElementById('profileImage');
             if (profileImg) {
                 profileImg.src = data['profile_image'];
+                loadedCount++;
             }
         }
 
@@ -124,10 +128,11 @@ function loadPortfolioData() {
             const dynamicSections = document.getElementById('dynamicSections');
             if (dynamicSections) {
                 dynamicSections.innerHTML = data['dynamic_sections'];
+                loadedCount++;
             }
         }
 
-        console.log('Portfolio loaded from localStorage!');
+        console.log(`Portfolio loaded from localStorage! (${loadedCount} items restored)`);
     } catch (e) {
         console.error('Error loading portfolio data:', e);
     }
@@ -816,10 +821,16 @@ document.addEventListener('keydown', (e) => {
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    // STEP 1: Load saved data FIRST (for everyone - admin + public)
+    loadPortfolioData();
+
+    // STEP 2: Then check admin
     initAdminAuth();
-    loadPortfolioData(); // Load saved data on page load
+
+    // STEP 3: Lock images for public
     lockImages();
 
+    // STEP 4: Lock profile image for public
     const heroWrapper = document.querySelector('.hero-image-wrapper');
     if (heroWrapper && !isAdmin) {
         heroWrapper.style.pointerEvents = 'none';
