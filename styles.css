@@ -537,3 +537,105 @@ body.admin-mode .editable-active:focus {
     }
     .lightbox-modal, .case-modal, .cert-modal, .crop-modal { display: none !important; }
 }
+
+
+
+
+/* ============================================
+   ADMIN UPLOAD STYLES
+   ============================================ */
+
+/* Admin hints - hidden by default */
+.admin-hint {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Show hints in admin mode */
+body.admin-mode .admin-hint {
+    display: block;
+}
+
+/* Cert image upload hover (admin only) */
+body.admin-mode .cert-image {
+    position: relative;
+    cursor: pointer;
+}
+body.admin-mode .cert-image::after {
+    content: "\f093  Click to Replace";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 182, 212, 0.8);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 20px 20px 0 0;
+    pointer-events: none;
+}
+body.admin-mode .cert-image:hover::after {
+    opacity: 1;
+}
+
+/* Gallery case upload hover (admin only) */
+body.admin-mode .gallery-case-preview {
+    position: relative;
+    cursor: pointer;
+}
+body.admin-mode .gallery-case-preview::after {
+    content: "\f093  Click to Replace";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 182, 212, 0.8);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 20px;
+    z-index: 3;
+    pointer-events: none;
+}
+body.admin-mode .gallery-case-preview:hover::after {
+    opacity: 1;
+}
+
+/* Profile image upload hover (admin only) */
+body.admin-mode .hero-image-wrapper {
+    cursor: pointer;
+}
+body.admin-mode .hero-image-wrapper::after {
+    content: "\f093  Click to Upload";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 182, 212, 0.8);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    z-index: 3;
+    pointer-events: none;
+}
+body.admin-mode .hero-image-wrapper:hover::after {
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

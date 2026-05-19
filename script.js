@@ -90,6 +90,9 @@ function savePortfolioData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     console.log(`Portfolio saved to localStorage! (${savedCount} items saved)`);
 
+    // Note: Images are saved individually when uploaded, not here
+    // to avoid duplicating large base64 data
+
     // Show save notification
     showSaveNotification('Changes Saved!');
 }
@@ -131,6 +134,9 @@ function loadPortfolioData() {
                 loadedCount++;
             }
         }
+
+        // Load saved images
+        loadSavedImages();
 
         console.log(`Portfolio loaded from localStorage! (${loadedCount} items restored)`);
     } catch (e) {
@@ -181,6 +187,166 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+// ============================================
+// CERTIFICATE & GALLERY IMAGE UPLOAD
+// ============================================
+
+// Handle certificate image upload
+function handleCertUpload(event, certId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Update the cert card image
+        const img = document.getElementById('cert-img-' + certId);
+        if (img) {
+            img.src = e.target.result;
+        }
+
+        // Update certData for modal
+        if (certData[certId]) {
+            certData[certId].image = e.target.result;
+        }
+
+        // Save to localStorage
+        saveImageToStorage('cert_image_' + certId, e.target.result);
+
+        showSaveNotification('Certificate Image Updated!');
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    event.target.value = '';
+}
+
+// Handle gallery case image upload
+function handleGalleryUpload(event, caseId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Update the gallery card image
+        const img = document.getElementById('gallery-img-' + caseId);
+        if (img) {
+            img.src = e.target.result;
+        }
+
+        // Update caseData for modal
+        if (caseData[caseId] && caseData[caseId].images.length > 0) {
+            caseData[caseId].images[0].src = e.target.result;
+        }
+
+        // Save to localStorage
+        saveImageToStorage('gallery_image_' + caseId, e.target.result);
+
+        showSaveNotification('Gallery Image Updated!');
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    event.target.value = '';
+}
+
+// Save image to localStorage (with size check)
+function saveImageToStorage(key, dataUrl) {
+    try {
+        localStorage.setItem(key, dataUrl);
+    } catch (e) {
+        // If quota exceeded, try to compress or show error
+        if (e.name === 'QuotaExceededError') {
+            console.warn('Image too large for localStorage. Consider using a smaller image.');
+            showSaveNotification('Image too large! Use smaller image.');
+        } else {
+            console.error('Error saving image:', e);
+        }
+    }
+}
+
+// Load saved images from localStorage
+function loadSavedImages() {
+    // Load certificate images
+    for (let i = 1; i <= 10; i++) {
+        const saved = localStorage.getItem('cert_image_' + i);
+        if (saved) {
+            const img = document.getElementById('cert-img-' + i);
+            if (img) {
+                img.src = saved;
+            }
+            if (certData[i]) {
+                certData[i].image = saved;
+            }
+        }
+    }
+
+    // Load gallery images
+    for (let i = 1; i <= 10; i++) {
+        const saved = localStorage.getItem('gallery_image_' + i);
+        if (saved) {
+            const img = document.getElementById('gallery-img-' + i);
+            if (img) {
+                img.src = saved;
+            }
+            if (caseData[i] && caseData[i].images.length > 0) {
+                caseData[i].images[0].src = saved;
+            }
+        }
+    }
+}
+
+// Setup click-to-upload for cert images (admin only)
+function setupCertUploadClicks() {
+    document.querySelectorAll('.cert-image').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (!isEditMode) return; // Only in edit mode
+
+            // Don't trigger if clicking on already uploaded image (modal should open)
+            const certCard = this.closest('.cert-card');
+            const certId = certCard ? certCard.getAttribute('data-cert-id') : null;
+
+            if (certId) {
+                e.stopPropagation();
+                e.preventDefault();
+                document.getElementById('cert-upload-' + certId).click();
+            }
+        });
+    });
+}
+
+// Setup click-to-upload for gallery images (admin only)
+function setupGalleryUploadClicks() {
+    document.querySelectorAll('.gallery-case-preview').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (!isEditMode) return; // Only in edit mode
+
+            const galleryItem = this.closest('.gallery-item');
+            const caseId = galleryItem ? galleryItem.getAttribute('data-case-id') : null;
+
+            if (caseId) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                // Check if upload input exists, if not create one
+                let uploadInput = document.getElementById('gallery-upload-' + caseId);
+                if (!uploadInput) {
+                    uploadInput = document.createElement('input');
+                    uploadInput.type = 'file';
+                    uploadInput.id = 'gallery-upload-' + caseId;
+                    uploadInput.accept = 'image/*';
+                    uploadInput.style.display = 'none';
+                    uploadInput.onchange = function(event) {
+                        handleGalleryUpload(event, caseId);
+                    };
+                    document.body.appendChild(uploadInput);
+                }
+                uploadInput.click();
+            }
+        });
+    });
+}
 
 // ============================================
 // TOGGLE EDIT MODE (WITH SAVE)
@@ -256,6 +422,15 @@ function toggleEditMode() {
         // 6. Unlock images for admin editing
         unlockImages();
 
+        // 7. Setup click-to-upload for cert and gallery images
+        setupCertUploadClicks();
+        setupGalleryUploadClicks();
+
+        // 8. Show upload hints
+        document.querySelectorAll('.admin-hint').forEach(el => {
+            el.style.display = 'block';
+        });
+
         console.log("Edit mode UNLOCKED - All text is now editable!");
 
     } else {
@@ -287,6 +462,11 @@ function toggleEditMode() {
 
         // 6. Lock images again
         lockImages();
+
+        // 7. Hide upload hints
+        document.querySelectorAll('.admin-hint').forEach(el => {
+            el.style.display = 'none';
+        });
 
         console.log("Edit mode LOCKED - All changes saved!");
     }
@@ -641,11 +821,9 @@ function addCertificate() {
     card.setAttribute('data-cert-id', certCount);
     card.innerHTML = `
         <div class="cert-image" onclick="openCertModal(${certCount})">
-            <div class="cert-image-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px;">
-                <i class="fas fa-image" style="font-size:2.5rem;opacity:0.4;"></i>
-                <p>Add Certificate Image</p>
-            </div>
+            <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=New+Certificate" alt="Certificate" id="cert-img-${certCount}">
         </div>
+        <input type="file" id="cert-upload-${certCount}" accept="image/*" style="display:none;" onchange="handleCertUpload(event, ${certCount})">
         <div class="cert-content">
             <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
             <h4 data-save-id="cert_title_${certCount}">[Certificate Title]</h4>
@@ -679,7 +857,7 @@ function addGalleryItem() {
     item.setAttribute('onclick', `openCaseModal(${galleryCount})`);
     item.innerHTML = `
         <div class="gallery-case-preview">
-            <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=New+Case+${galleryCount}" alt="Case ${galleryCount}">
+            <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=New+Case+${galleryCount}" alt="Case ${galleryCount}" id="gallery-img-${galleryCount}">
             <div class="case-image-count"><i class="fas fa-images"></i> 1</div>
         </div>
         <div class="gallery-overlay">

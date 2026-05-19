@@ -305,8 +305,9 @@
             <div class="cert-grid" id="certGrid">
                 <div class="cert-card reveal" data-cert-id="1">
                     <div class="cert-image" onclick="openCertModal(1)">
-                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=BLS+Certificate" alt="BLS Certificate">
+                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=BLS+Certificate" alt="BLS Certificate" id="cert-img-1">
                     </div>
+                    <input type="file" id="cert-upload-1" accept="image/*" style="display:none;" onchange="handleCertUpload(event, 1)">
                     <div class="cert-content">
                         <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
                         <h4>Basic Life Support (BLS)</h4>
@@ -316,8 +317,9 @@
                 </div>
                 <div class="cert-card reveal delay-1" data-cert-id="2">
                     <div class="cert-image" onclick="openCertModal(2)">
-                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=ACLS+Certificate" alt="ACLS Certificate">
+                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=ACLS+Certificate" alt="ACLS Certificate" id="cert-img-2">
                     </div>
+                    <input type="file" id="cert-upload-2" accept="image/*" style="display:none;" onchange="handleCertUpload(event, 2)">
                     <div class="cert-content">
                         <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
                         <h4>Advanced Cardiac Life Support (ACLS)</h4>
@@ -327,8 +329,9 @@
                 </div>
                 <div class="cert-card reveal delay-2" data-cert-id="3">
                     <div class="cert-image" onclick="openCertModal(3)">
-                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=Workshop+Certificate" alt="Workshop Certificate">
+                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=Workshop+Certificate" alt="Workshop Certificate" id="cert-img-3">
                     </div>
+                    <input type="file" id="cert-upload-3" accept="image/*" style="display:none;" onchange="handleCertUpload(event, 3)">
                     <div class="cert-content">
                         <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
                         <h4>[Workshop Name]</h4>
@@ -338,8 +341,9 @@
                 </div>
                 <div class="cert-card reveal delay-3" data-cert-id="4">
                     <div class="cert-image" onclick="openCertModal(4)">
-                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=Conference+Certificate" alt="Conference Certificate">
+                        <img src="https://via.placeholder.com/400x200/1e293b/06b6d4?text=Conference+Certificate" alt="Conference Certificate" id="cert-img-4">
                     </div>
+                    <input type="file" id="cert-upload-4" accept="image/*" style="display:none;" onchange="handleCertUpload(event, 4)">
                     <div class="cert-content">
                         <div class="cert-badge"><i class="fas fa-check-circle"></i> Verified</div>
                         <h4>[Conference/CME]</h4>
@@ -353,6 +357,9 @@
                     <i class="fas fa-plus"></i> Add More Certificates
                 </button>
             </div>
+            <p style="text-align: center; margin-top: 15px; color: var(--text-muted); font-size: 0.85rem;" id="certUploadHint" class="admin-hint">
+                <i class="fas fa-info-circle"></i> Click on any certificate image to replace it
+            </p>
         </section>
 
         <!-- Gallery Section -->
@@ -365,7 +372,7 @@
                 <!-- Gallery items with multi-image support -->
                 <div class="gallery-item reveal-scale delay-1" data-case-id="1" onclick="openCaseModal(1)">
                     <div class="gallery-case-preview">
-                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+1" alt="Case 1">
+                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+1" alt="Case 1" id="gallery-img-1">
                         <div class="case-image-count"><i class="fas fa-images"></i> 3</div>
                     </div>
                     <div class="gallery-overlay">
@@ -375,7 +382,7 @@
                 </div>
                 <div class="gallery-item reveal-scale delay-2" data-case-id="2" onclick="openCaseModal(2)">
                     <div class="gallery-case-preview">
-                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+2" alt="Case 2">
+                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+2" alt="Case 2" id="gallery-img-2">
                         <div class="case-image-count"><i class="fas fa-images"></i> 4</div>
                     </div>
                     <div class="gallery-overlay">
@@ -385,7 +392,7 @@
                 </div>
                 <div class="gallery-item reveal-scale delay-3" data-case-id="3" onclick="openCaseModal(3)">
                     <div class="gallery-case-preview">
-                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+3" alt="Case 3">
+                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+3" alt="Case 3" id="gallery-img-3">
                         <div class="case-image-count"><i class="fas fa-images"></i> 2</div>
                     </div>
                     <div class="gallery-overlay">
@@ -395,7 +402,7 @@
                 </div>
                 <div class="gallery-item reveal-scale delay-4" data-case-id="4" onclick="openCaseModal(4)">
                     <div class="gallery-case-preview">
-                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+4" alt="Case 4">
+                        <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=Case+4" alt="Case 4" id="gallery-img-4">
                         <div class="case-image-count"><i class="fas fa-images"></i> 3</div>
                     </div>
                     <div class="gallery-overlay">
@@ -409,6 +416,9 @@
                     <i class="fas fa-plus"></i> Add More Cases
                 </button>
             </div>
+            <p style="text-align: center; margin-top: 15px; color: var(--text-muted); font-size: 0.85rem;" id="galleryUploadHint" class="admin-hint">
+                <i class="fas fa-info-circle"></i> Click on any case image to replace it
+            </p>
             <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.9rem;">
                 <i class="fas fa-info-circle"></i> <span>Click on any case to view full details and images. Ensure patient consent for identifiable images.</span>
             </p>
