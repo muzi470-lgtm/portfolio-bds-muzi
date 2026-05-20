@@ -142,10 +142,15 @@ function loadPortfolioData() {
         const data = JSON.parse(saved);
         let loadedCount = 0;
 
+        console.log('Loading data keys:', Object.keys(data));
+
         // Restore text content by data-save-id
         document.querySelectorAll('[data-save-id]').forEach(el => {
             const id = el.getAttribute('data-save-id');
-            if (id && data[id] !== undefined) {
+            if (!id) return;
+
+            // Restore innerHTML
+            if (data[id] !== undefined) {
                 el.innerHTML = data[id];
                 loadedCount++;
             }
@@ -153,6 +158,13 @@ function loadPortfolioData() {
             // Restore href for links
             if (el.tagName === 'A' && data[id + '_href'] !== undefined) {
                 el.setAttribute('href', data[id + '_href']);
+                loadedCount++;
+                console.log('Restored href for', id, ':', data[id + '_href']);
+            }
+
+            // Restore src for images
+            if (el.tagName === 'IMG' && data[id + '_src'] !== undefined) {
+                el.setAttribute('src', data[id + '_src']);
                 loadedCount++;
             }
         });
@@ -175,8 +187,48 @@ function loadPortfolioData() {
             }
         }
 
-        // Load saved images
-        loadSavedImages();
+        // Restore gallery images
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const caseId = item.getAttribute('data-case-id');
+            if (caseId && data['gallery_image_' + caseId]) {
+                const img = item.querySelector('img');
+                if (img) {
+                    img.src = data['gallery_image_' + caseId];
+                    loadedCount++;
+                }
+                // Also update caseData
+                if (caseData[caseId] && caseData[caseId].images.length > 0) {
+                    caseData[caseId].images[0].src = data['gallery_image_' + caseId];
+                }
+            }
+        });
+
+        // Restore cert images
+        document.querySelectorAll('.cert-card').forEach(card => {
+            const certId = card.getAttribute('data-cert-id');
+            if (certId && data['cert_image_' + certId]) {
+                const img = card.querySelector('.cert-image img');
+                if (img) {
+                    img.src = data['cert_image_' + certId];
+                    loadedCount++;
+                }
+                if (certData[certId]) {
+                    certData[certId].image = data['cert_image_' + certId];
+                }
+            }
+        });
+
+        // Load saved case images
+        for (let caseId = 1; caseId <= 20; caseId++) {
+            if (caseData[caseId]) {
+                caseData[caseId].images.forEach((img, index) => {
+                    const saved = localStorage.getItem('case_image_' + caseId + '_' + index);
+                    if (saved) {
+                        img.src = saved;
+                    }
+                });
+            }
+        }
 
         console.log(`Portfolio loaded from localStorage! (${loadedCount} items restored)`);
     } catch (e) {
