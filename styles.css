@@ -840,3 +840,50 @@ body.admin-mode input[type="file"]#profileUpload {
     display: none !important;
     pointer-events: auto !important;
 }
+
+
+/* ============================================
+   EDITABLE LINKS (Admin Edit Mode)
+   ============================================ */
+
+/* Links in admin edit mode */
+body.admin-mode a[data-save-id^="link_"],
+body.admin-mode a[data-save-id^="footer_social_"] {
+    position: relative;
+    cursor: text !important;
+}
+
+/* Visual indicator for editable links */
+body.admin-mode a[data-save-id^="link_"]::after,
+body.admin-mode a[data-save-id^="footer_social_"]::after {
+    content: "\f303  Double-click to edit URL";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+}
+
+body.admin-mode a[data-save-id^="link_"]:hover::after,
+body.admin-mode a[data-save-id^="footer_social_"]:hover::after {
+    opacity: 1;
+}
+
+/* Highlight editable links */
+body.admin-mode a[data-save-id^="link_"]:hover,
+body.admin-mode a[data-save-id^="footer_social_"]:hover {
+    border: 1px dashed var(--accent);
+    border-radius: 50px;
+    padding: 2px 8px;
+}

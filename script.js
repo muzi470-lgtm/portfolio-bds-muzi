@@ -442,6 +442,34 @@ function setupGalleryUploadClicks() {
     });
 }
 
+
+// Setup link editing in admin mode
+function setupLinkEditing() {
+    console.log('Setting up link editing...');
+
+    document.querySelectorAll('a[data-save-id^="link_"], a[data-save-id^="footer_social_"]').forEach(link => {
+        // Add visual indicator that link is editable
+        link.style.cursor = 'text';
+        link.title = 'Double-click to edit URL';
+
+        // Double-click to edit URL
+        link.addEventListener('dblclick', function(e) {
+            if (!isEditMode) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const currentHref = this.getAttribute('href');
+            const newHref = prompt('Edit URL:', currentHref);
+
+            if (newHref !== null && newHref.trim() !== '') {
+                this.setAttribute('href', newHref.trim());
+                console.log('Link updated:', newHref);
+                showSaveNotification('Link Updated!');
+            }
+        });
+    });
+}
+
 // ============================================
 // TOGGLE EDIT MODE (WITH SAVE)
 // ============================================
@@ -458,7 +486,7 @@ function toggleEditMode() {
         // CRITICAL: Enable file inputs first
         enableFileInputsForAdmin();
 
-        // 1. Inject contenteditable="true" into ALL text elements
+        // 1. Inject contenteditable="true" into ALL text elements AND links
         const editableSelectors = [
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
             'p', 'span', 'li', 'div.about-text',
@@ -473,7 +501,7 @@ function toggleEditMode() {
             '.footer-bottom p',
             '.case-modal-desc',
             '.section-header h2 span', '.section-header p',
-            '.contact-btn span', '.footer-social a'
+            '.contact-btn span'
         ];
 
         let idCounter = 0;
@@ -526,6 +554,9 @@ function toggleEditMode() {
 
         // Setup case image uploads if modal is open
         setupCaseImageUploads();
+
+        // 8. Setup link editing (double-click to edit URL)
+        setupLinkEditing();
 
         // 8. Show upload hints
         document.querySelectorAll('.admin-hint').forEach(el => {
