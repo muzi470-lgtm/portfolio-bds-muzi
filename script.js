@@ -149,6 +149,12 @@ function loadPortfolioData() {
                 el.innerHTML = data[id];
                 loadedCount++;
             }
+
+            // Restore href for links
+            if (el.tagName === 'A' && data[id + '_href'] !== undefined) {
+                el.setAttribute('href', data[id + '_href']);
+                loadedCount++;
+            }
         });
 
         // Restore profile image
@@ -466,7 +472,8 @@ function toggleEditMode() {
             '.footer h3', '.footer p', '.footer-contact span span',
             '.footer-bottom p',
             '.case-modal-desc',
-            '.section-header h2 span', '.section-header p'
+            '.section-header h2 span', '.section-header p',
+            '.contact-btn span', '.footer-social a'
         ];
 
         let idCounter = 0;
