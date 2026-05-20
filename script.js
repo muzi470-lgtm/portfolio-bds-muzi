@@ -514,16 +514,9 @@ function toggleEditMode() {
         setupCertUploadClicks();
         setupGalleryUploadClicks();
 
-        // Show gallery file inputs in edit mode
-        document.querySelectorAll('.gallery-file-input').forEach(input => {
-            input.style.display = 'block';
-            input.style.opacity = '0';
-            input.style.position = 'absolute';
-            input.style.inset = '0';
-            input.style.width = '100%';
-            input.style.height = '100%';
-            input.style.cursor = 'pointer';
-            input.style.zIndex = '10';
+        // Enable file inputs in edit mode (CSS will show them)
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.disabled = false;
         });
 
         // Setup case image uploads if modal is open
@@ -571,9 +564,11 @@ function toggleEditMode() {
             el.style.display = 'none';
         });
 
-        // Hide gallery file inputs in view mode
-        document.querySelectorAll('.gallery-file-input').forEach(input => {
+        // Disable ALL file inputs in view mode
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.disabled = true;
             input.style.display = 'none';
+            input.style.pointerEvents = 'none';
         });
 
         console.log("Edit mode LOCKED - All changes saved!");
@@ -1151,6 +1146,7 @@ function saveToPDF() {
 // IMAGE LOCKING (Robust Cross-Browser)
 // ============================================
 function lockImages() {
+    // Lock all images
     document.querySelectorAll('img').forEach(img => {
         img.setAttribute('draggable', 'false');
         img.style.webkitUserDrag = 'none';
@@ -1160,9 +1156,17 @@ function lockImages() {
         img.style.msUserSelect = 'none';
         img.style.pointerEvents = 'none';
     });
+
+    // Disable all file inputs completely
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.disabled = true;
+        input.style.display = 'none';
+        input.style.pointerEvents = 'none';
+    });
 }
 
 function unlockImages() {
+    // Unlock images
     document.querySelectorAll('img').forEach(img => {
         img.setAttribute('draggable', 'true');
         img.style.webkitUserDrag = 'auto';
@@ -1171,6 +1175,12 @@ function unlockImages() {
         img.style.mozUserSelect = 'auto';
         img.style.msUserSelect = 'auto';
         img.style.pointerEvents = 'auto';
+    });
+
+    // Enable file inputs for admin only
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.disabled = false;
+        // Don't change display here - let CSS handle it based on body.admin-mode
     });
 }
 
