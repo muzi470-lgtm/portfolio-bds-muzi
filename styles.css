@@ -639,3 +639,56 @@ body.admin-mode .hero-image-wrapper:hover::after {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+
+/* ============================================
+   GALLERY FILE INPUT OVERLAY (Admin Edit Mode)
+   ============================================ */
+
+/* Gallery file input - hidden by default */
+.gallery-file-input {
+    display: none;
+}
+
+/* In admin edit mode, show file input as overlay */
+body.admin-mode .gallery-file-input {
+    display: block !important;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Gallery case preview needs relative positioning for overlay */
+.gallery-case-preview {
+    position: relative;
+}
+
+/* Admin overlay text for gallery */
+body.admin-mode .gallery-case-preview::before {
+    content: "\f093  Tap to Replace";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(6, 182, 212, 0.9);
+    color: var(--primary);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+body.admin-mode .gallery-item:hover .gallery-case-preview::before {
+    opacity: 1;
+}

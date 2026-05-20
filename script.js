@@ -292,24 +292,38 @@ function handleGalleryUpload(event, caseId) {
     event.target.value = '';
 }
 
-// Unified gallery click handler - decides between upload or modal
-function handleGalleryClick(caseId) {
-    console.log('Gallery clicked, caseId:', caseId, 'isEditMode:', isEditMode);
+// Gallery upload handler - called when file is selected
+function handleGalleryUpload(event, caseId) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    if (isEditMode) {
-        // In edit mode: trigger file upload
-        console.log('Edit mode active - triggering upload for case', caseId);
-        const uploadInput = document.getElementById('gallery-upload-' + caseId);
-        if (uploadInput) {
-            uploadInput.click();
-        } else {
-            console.error('Upload input not found for gallery case', caseId);
+    console.log('Gallery upload triggered for case:', caseId);
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        console.log('Gallery image loaded, updating...');
+
+        // Update the gallery card image
+        const img = document.getElementById('gallery-img-' + caseId);
+        if (img) {
+            img.src = e.target.result;
+            console.log('Gallery img-' + caseId + ' updated');
         }
-    } else {
-        // In view mode: open case modal
-        console.log('View mode - opening case modal for', caseId);
-        openCaseModal(caseId);
-    }
+
+        // Update caseData for modal
+        if (caseData[caseId] && caseData[caseId].images.length > 0) {
+            caseData[caseId].images[0].src = e.target.result;
+        }
+
+        // Save to localStorage
+        saveImageToStorage('gallery_image_' + caseId, e.target.result);
+
+        showSaveNotification('Gallery Image Updated!');
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    event.target.value = '';
 }
 
 // Save image to localStorage (with size check)
@@ -389,32 +403,23 @@ function setupCertUploadClicks() {
     });
 }
 
-// Setup click-to-upload for gallery images (admin only)
+// Setup gallery file inputs for admin mode
 function setupGalleryUploadClicks() {
-    console.log('Setting up gallery upload clicks...');
-    document.querySelectorAll('.gallery-case-preview').forEach(el => {
-        // Remove old listeners first to avoid duplicates
-        const newEl = el.cloneNode(true);
-        el.parentNode.replaceChild(newEl, el);
+    console.log('Setting up gallery file inputs...');
 
-        newEl.addEventListener('click', function(e) {
-            if (!isEditMode) return;
-
-            const galleryItem = this.closest('.gallery-item');
-            const caseId = galleryItem ? galleryItem.getAttribute('data-case-id') : null;
-
-            if (caseId) {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('Gallery clicked for upload:', caseId);
-                const uploadInput = document.getElementById('gallery-upload-' + caseId);
-                if (uploadInput) {
-                    uploadInput.click();
-                } else {
-                    console.error('Gallery upload input not found for case', caseId);
-                }
-            }
-        });
+    document.querySelectorAll('.gallery-file-input').forEach(input => {
+        // In edit mode, file inputs are visible and clickable
+        // In view mode, they're hidden behind the image
+        if (isEditMode) {
+            input.style.display = 'block';
+            input.style.opacity = '0';
+            input.style.position = 'absolute';
+            input.style.inset = '0';
+            input.style.width = '100%';
+            input.style.height = '100%';
+            input.style.cursor = 'pointer';
+            input.style.zIndex = '10';
+        }
     });
 }
 
@@ -496,6 +501,18 @@ function toggleEditMode() {
         setupCertUploadClicks();
         setupGalleryUploadClicks();
 
+        // Show gallery file inputs in edit mode
+        document.querySelectorAll('.gallery-file-input').forEach(input => {
+            input.style.display = 'block';
+            input.style.opacity = '0';
+            input.style.position = 'absolute';
+            input.style.inset = '0';
+            input.style.width = '100%';
+            input.style.height = '100%';
+            input.style.cursor = 'pointer';
+            input.style.zIndex = '10';
+        });
+
         // 8. Show upload hints
         document.querySelectorAll('.admin-hint').forEach(el => {
             el.style.display = 'block';
@@ -536,6 +553,11 @@ function toggleEditMode() {
         // 7. Hide upload hints
         document.querySelectorAll('.admin-hint').forEach(el => {
             el.style.display = 'none';
+        });
+
+        // Hide gallery file inputs in view mode
+        document.querySelectorAll('.gallery-file-input').forEach(input => {
+            input.style.display = 'none';
         });
 
         console.log("Edit mode LOCKED - All changes saved!");
@@ -926,11 +948,11 @@ function addGalleryItem() {
     item.setAttribute('data-case-id', galleryCount);
     item.setAttribute('onclick', `openCaseModal(${galleryCount})`);
     item.innerHTML = `
-        <div class="gallery-case-preview" onclick="handleGalleryClick(${galleryCount})">
+        <div class="gallery-case-preview">
             <img src="https://via.placeholder.com/400x300/1e293b/06b6d4?text=New+Case+${galleryCount}" alt="Case ${galleryCount}" id="gallery-img-${galleryCount}">
             <div class="case-image-count"><i class="fas fa-images"></i> 1</div>
+            <input type="file" class="gallery-file-input" id="gallery-upload-${galleryCount}" accept="image/*" onchange="handleGalleryUpload(event, ${galleryCount})">
         </div>
-        <input type="file" id="gallery-upload-${galleryCount}" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, ${galleryCount})">
         <div class="gallery-overlay">
             <h4 data-save-id="gallery_title_${galleryCount}">[Case Title]</h4>
             <p data-save-id="gallery_desc_${galleryCount}">[Brief description]</p>
