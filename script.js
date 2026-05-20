@@ -449,6 +449,9 @@ function toggleEditMode() {
     if (isEditMode) {
         // ========== EDIT MODE ON ==========
 
+        // CRITICAL: Enable file inputs first
+        enableFileInputsForAdmin();
+
         // 1. Inject contenteditable="true" into ALL text elements
         const editableSelectors = [
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -514,11 +517,6 @@ function toggleEditMode() {
         setupCertUploadClicks();
         setupGalleryUploadClicks();
 
-        // Enable file inputs in edit mode (CSS will show them)
-        document.querySelectorAll('input[type="file"]').forEach(input => {
-            input.disabled = false;
-        });
-
         // Setup case image uploads if modal is open
         setupCaseImageUploads();
 
@@ -564,12 +562,8 @@ function toggleEditMode() {
             el.style.display = 'none';
         });
 
-        // Disable ALL file inputs in view mode
-        document.querySelectorAll('input[type="file"]').forEach(input => {
-            input.disabled = true;
-            input.style.display = 'none';
-            input.style.pointerEvents = 'none';
-        });
+        // CRITICAL: Disable ALL file inputs when locking
+        disableAllFileInputs();
 
         console.log("Edit mode LOCKED - All changes saved!");
     }
@@ -1157,12 +1151,7 @@ function lockImages() {
         img.style.pointerEvents = 'none';
     });
 
-    // Disable all file inputs completely
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.disabled = true;
-        input.style.display = 'none';
-        input.style.pointerEvents = 'none';
-    });
+    // Note: File inputs are handled by disableAllFileInputs() separately
 }
 
 function unlockImages() {
@@ -1177,11 +1166,7 @@ function unlockImages() {
         img.style.pointerEvents = 'auto';
     });
 
-    // Enable file inputs for admin only
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.disabled = false;
-        // Don't change display here - let CSS handle it based on body.admin-mode
-    });
+    // Note: File inputs are handled by enableFileInputsForAdmin() separately
 }
 
 document.addEventListener('contextmenu', (e) => {
@@ -1210,7 +1195,11 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Current URL:', window.location.href);
     console.log('Search params:', window.location.search);
 
-    // STEP 1: Check admin FIRST (before anything else)
+    // STEP 0: CRITICAL - Disable ALL file inputs immediately before anything else
+    // This prevents any accidental uploads in public view
+    disableAllFileInputs();
+
+    // STEP 1: Check admin FIRST
     initAdminAuth();
 
     // STEP 2: Load saved data (for everyone)
@@ -1239,3 +1228,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('Initialization complete. isAdmin:', isAdmin);
 });
+
+// CRITICAL: Disable all file inputs - called immediately on load
+function disableAllFileInputs() {
+    console.log('CRITICAL: Disabling all file inputs...');
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.disabled = true;
+        input.style.cssText = 'display: none !important; pointer-events: none !important; opacity: 0 !important; width: 0 !important; height: 0 !important; position: absolute !important; z-index: -9999 !important;';
+        input.setAttribute('tabindex', '-1');
+        input.setAttribute('aria-hidden', 'true');
+    });
+    console.log('All file inputs disabled.');
+}
+
+// Enable file inputs for admin edit mode
+function enableFileInputsForAdmin() {
+    console.log('Enabling file inputs for admin edit mode...');
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.disabled = false;
+        input.removeAttribute('tabindex');
+        input.removeAttribute('aria-hidden');
+
+        // Reset styles based on input type
+        if (input.id === 'profileUpload') {
+            input.style.cssText = 'display: none;';
+        } else if (input.classList.contains('gallery-file-input')) {
+            input.style.cssText = 'display: block; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 10;';
+        } else if (input.classList.contains('case-file-input')) {
+            input.style.cssText = 'display: block; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 200px; cursor: pointer; z-index: 10;';
+        } else if (input.id && input.id.startsWith('cert-upload-')) {
+            input.style.cssText = 'display: none;';
+        } else {
+            input.style.cssText = 'display: none;';
+        }
+    });
+    console.log('File inputs enabled for admin.');
+}
