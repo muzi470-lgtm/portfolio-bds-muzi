@@ -692,3 +692,72 @@ body.admin-mode .gallery-case-preview::before {
 body.admin-mode .gallery-item:hover .gallery-case-preview::before {
     opacity: 1;
 }
+
+
+/* ============================================
+   CASE IMAGE UPLOAD IN MODAL (Admin Edit Mode)
+   ============================================ */
+
+/* Case image container for upload overlay */
+.case-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+}
+
+/* Case file input - hidden by default */
+.case-file-input {
+    display: none;
+}
+
+/* In admin edit mode, show file input as overlay on case images */
+body.admin-mode .case-file-input {
+    display: block !important;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Admin overlay text for case images */
+body.admin-mode .case-image-container::before {
+    content: "\f093  Tap to Replace";
+    font-family: "Font Awesome 6 Free", "Outfit", sans-serif;
+    font-weight: 600;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(6, 182, 212, 0.9);
+    color: var(--primary);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+body.admin-mode .case-image-item:hover .case-image-container::before {
+    opacity: 1;
+}
+
+/* Case image caption editable in admin mode */
+body.admin-mode .case-image-caption {
+    cursor: text;
+    border: 1px dashed transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: all 0.2s;
+}
+
+body.admin-mode .case-image-caption:hover {
+    border-color: var(--accent);
+    background: rgba(6,182,212,0.05);
+}

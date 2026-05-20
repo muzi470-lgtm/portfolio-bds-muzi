@@ -374,6 +374,19 @@ function loadSavedImages() {
             }
         }
     }
+
+    // Load case images (for all cases and all their images)
+    for (let caseId = 1; caseId <= 20; caseId++) {
+        if (caseData[caseId]) {
+            caseData[caseId].images.forEach((img, index) => {
+                const saved = localStorage.getItem('case_image_' + caseId + '_' + index);
+                if (saved) {
+                    img.src = saved;
+                    console.log('Loaded case image', caseId, 'index', index);
+                }
+            });
+        }
+    }
 }
 
 // Setup click-to-upload for cert images (admin only)
@@ -512,6 +525,9 @@ function toggleEditMode() {
             input.style.cursor = 'pointer';
             input.style.zIndex = '10';
         });
+
+        // Setup case image uploads if modal is open
+        setupCaseImageUploads();
 
         // 8. Show upload hints
         document.querySelectorAll('.admin-hint').forEach(el => {
@@ -827,15 +843,103 @@ function openCaseModal(caseId) {
     data.images.forEach((img, index) => {
         const item = document.createElement('div');
         item.className = 'case-image-item';
-        item.innerHTML = `
-            <img src="${img.src}" alt="${img.caption}" onclick="openLightboxFromCase(${caseId}, ${index})">
-            <div class="case-image-caption">${img.caption}</div>
-        `;
+        item.setAttribute('data-case-id', caseId);
+        item.setAttribute('data-img-index', index);
+
+        // Create the image container with upload support
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'case-image-container';
+        imgContainer.style.position = 'relative';
+
+        const imgEl = document.createElement('img');
+        imgEl.src = img.src;
+        imgEl.alt = img.caption;
+        imgEl.id = `case-img-${caseId}-${index}`;
+        imgEl.onclick = function() { openLightboxFromCase(caseId, index); };
+
+        // Add file input for each image (hidden, used in edit mode)
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.className = 'case-file-input';
+        fileInput.id = `case-upload-${caseId}-${index}`;
+        fileInput.accept = 'image/*';
+        fileInput.onchange = function(event) { handleCaseImageUpload(event, caseId, index); };
+
+        imgContainer.appendChild(imgEl);
+        imgContainer.appendChild(fileInput);
+
+        const captionEl = document.createElement('div');
+        captionEl.className = 'case-image-caption';
+        captionEl.setAttribute('data-save-id', `case_caption_${caseId}_${index}`);
+        captionEl.textContent = img.caption;
+
+        item.appendChild(imgContainer);
+        item.appendChild(captionEl);
         grid.appendChild(item);
     });
 
+    // If in edit mode, show upload overlays
+    if (isEditMode) {
+        setupCaseImageUploads();
+    }
+
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+}
+
+// Handle case image upload in modal
+function handleCaseImageUpload(event, caseId, imgIndex) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    console.log('Case image upload triggered for case:', caseId, 'image:', imgIndex);
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Update the image in modal
+        const img = document.getElementById('case-img-' + caseId + '-' + imgIndex);
+        if (img) {
+            img.src = e.target.result;
+        }
+
+        // Update caseData
+        if (caseData[caseId] && caseData[caseId].images[imgIndex]) {
+            caseData[caseId].images[imgIndex].src = e.target.result;
+        }
+
+        // Update gallery thumbnail if this is the first image
+        if (imgIndex === 0) {
+            const galleryImg = document.getElementById('gallery-img-' + caseId);
+            if (galleryImg) {
+                galleryImg.src = e.target.result;
+            }
+            // Also save gallery image
+            saveImageToStorage('gallery_image_' + caseId, e.target.result);
+        }
+
+        // Save case image
+        saveImageToStorage('case_image_' + caseId + '_' + imgIndex, e.target.result);
+
+        showSaveNotification('Case Image ' + (imgIndex + 1) + ' Updated!');
+    };
+    reader.readAsDataURL(file);
+
+    event.target.value = '';
+}
+
+// Setup case image upload overlays in modal
+function setupCaseImageUploads() {
+    document.querySelectorAll('.case-file-input').forEach(input => {
+        input.style.display = 'block';
+        input.style.opacity = '0';
+        input.style.position = 'absolute';
+        input.style.top = '0';
+        input.style.left = '0';
+        input.style.width = '100%';
+        input.style.height = '200px';
+        input.style.cursor = 'pointer';
+        input.style.zIndex = '10';
+    });
 }
 
 function openLightboxFromCase(caseId, imageIndex) {
